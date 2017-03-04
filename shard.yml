@@ -1,0 +1,9 @@
+name: sf
+version: 0.1.0
+
+authors:
+  - mosop
+
+crystal: 0.21.0
+
+license: MIT
