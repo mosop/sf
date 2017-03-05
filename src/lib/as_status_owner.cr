@@ -35,6 +35,15 @@ module Sf::AsStatusOwner
         @array.unsafe_at(index)
       end
 
+      def append(owner : ::{{@type}}, name : String | Symbol, desc : String? = nil)
+        owner.status name, desc: desc
+        @array << owner
+      end
+
+      def <<(owner : ::{{@type}})
+        @array << owner
+      end
+
       def continue
         begin
           yield
