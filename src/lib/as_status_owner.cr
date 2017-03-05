@@ -64,6 +64,10 @@ module Sf::AsStatusOwner
         name = name.id
       \%}
 
+      def \{{name}}?
+        @status.name == \{{name.stringify}}
+      end
+
       def \{{name}}!(desc : String? = nil)
         status! \{{name.stringify}}, desc: desc
       end
