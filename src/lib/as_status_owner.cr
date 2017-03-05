@@ -10,6 +10,11 @@ module Sf::AsStatusOwner
 
     property status : ::Sf::Status = ::Sf::Status.new("")
 
+    def status(name : String | Symbol, desc : String? = nil)
+      @status = ::Sf::Status.new(name, desc: desc)
+      self
+    end
+
     def status!(name : String | Symbol, desc : String? = nil)
       raise ::{{@type}}::RaisableStatus.new(
         self,
