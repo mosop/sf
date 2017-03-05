@@ -10,13 +10,32 @@ module Sf::AsStatusOwner
 
     property status : ::Sf::Status = ::Sf::Status.new("")
 
-    class Statuses < ::Array(::{{@type}})
+    def status!(name : String | Symbol, desc : String? = nil)
+      raise ::{{@type}}::RaisableStatus.new(
+        self,
+        ::Sf::Status.new(name, desc: desc)
+      )
+    end
+
+    class Statuses
+      include ::Indexable(::{{@type}})
+
+      @array = [] of ::{{@type}}
+
+      def size
+        @array.size
+      end
+
+      def unsafe_at(index : ::Int)
+        @array.unsafe_at(index)
+      end
+
       def continue
         begin
           yield
         rescue ex : ::{{@type}}::RaisableStatus
           ex.owner.status = ex.status
-          self << ex.owner
+          @array << ex.owner
         end
       end
 
@@ -32,10 +51,7 @@ module Sf::AsStatusOwner
       \%}
 
       def \{{name}}!(desc : String? = nil)
-        raise ::{{@type}}::RaisableStatus.new(
-          self,
-          ::Sf::Status.new(\{{name.stringify}}, desc: desc)
-        )
+        status! \{{name.stringify}}, desc: desc
       end
 
       class Statuses
