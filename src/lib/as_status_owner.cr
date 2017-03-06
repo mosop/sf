@@ -25,23 +25,24 @@ module Sf::AsStatusOwner
     class Statuses
       include ::Indexable(::{{@type}})
 
-      @array = [] of ::{{@type}}
+      @hash = {} of ::{{@type}} => ::Nil
+
+      @by_status : ::Hash(::String, ::Array(::{{@type}}))?
+      def by_status
+        @by_status ||= {} of ::String => ::Array(::{{@type}})
+      end
 
       def size
-        @array.size
+        @hash.size
       end
 
       def unsafe_at(index : ::Int)
-        @array.unsafe_at(index)
-      end
-
-      def append(owner : ::{{@type}}, name : String | Symbol, desc : String? = nil)
-        owner.status name, desc: desc
-        @array << owner
+        @hash.keys[index]
       end
 
       def <<(owner : ::{{@type}})
-        @array << owner
+        @by_status = nil
+        @hash[owner] = nil
       end
 
       def continue
@@ -49,7 +50,7 @@ module Sf::AsStatusOwner
           yield
         rescue ex : ::{{@type}}::RaisableStatus
           ex.owner.status = ex.status
-          @array << ex.owner
+          self << ex.owner
         end
       end
 
@@ -62,24 +63,31 @@ module Sf::AsStatusOwner
     macro status(name)
       \{%
         name = name.id
+        name_string = name.stringify
       \%}
 
       def \{{name}}?
-        @status.name == \{{name.stringify}}
+        @status.name == \{{name_string}}
       end
 
       def \{{name}}!(desc : String? = nil)
-        status! \{{name.stringify}}, desc: desc
+        status! \{{name_string}}, desc: desc
       end
 
       class Statuses
         def has_\{{name}}?
-          has_status?(\{{name.stringify}})
+          has_status?(\{{name_string}})
         end
 
         @\{{name}} : ::Array(::{{@type}})?
         def \{{name}}
-          @\{{name}} ||= self.select{|i| i.status.name == \{{name.stringify}}}
+          by_status[\{{name_string}}]? || (by_status[\{{name_string}}] = self.select{|i| i.\{{name}}?})
+        end
+
+        def each_\{{name}}
+          each do |i|
+            yield i if i.\{{name}}?
+          end
         end
       end
     end
